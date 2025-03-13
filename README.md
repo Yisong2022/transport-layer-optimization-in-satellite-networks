@@ -4,7 +4,9 @@ This is the repository of "Large Scale Satellite IP Networks" Side meeting in IE
 - Time: Tuesday (March 18) , 15:00-16:00
 - Location: Meeting Room 3
 - Organizer: Yisong Liu(China Mobile), liuyisong@chinamobile.com
-- Purpose: Identifying the problems of applying existing transport layer protocols in LEO networks, and also the use cases; Collecting the feedback on the interest in IETF WIT area.
+- Purpose:
+  - Identifying the problems of applying existing transport layer protocols in LEO networks, and also the use cases.
+  - Collecting the feedback on the interest in IETF WIT area.
 - Meeting link: https://ietf.webex.com/meet/ietfsidemeeting3
 
 # Agenda
