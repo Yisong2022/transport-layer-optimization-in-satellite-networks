@@ -1,1 +1,5 @@
-
+Time: 15:00-16:00
+Meeting Title: Transport Layer protocol optimization in satellite network
+IETF Webex: https://ietf.webex.com/meet/ietfsidemeeting3
+Meeting Organizer: Yisong Liu, liuyisong@chinamobile.com
+Meeting Description: Low-altitude satellite networks frequently switch connections in a short period of time. Since TCP packet loss is very sensitive, it has a great impact on the existing congestion control mechanism of the transport layer. By introducing some common detection mechanisms at the transport layer, we can identify such scenarios and improve transmission quality.
