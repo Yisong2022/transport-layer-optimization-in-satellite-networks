@@ -10,7 +10,7 @@ This is the repository of "Transport Layer Protocol Optimization in Satellite Ne
 - Meeting link: https://ietf.webex.com/meet/ietfsidemeeting3
 
 # Agenda
-1. Chair Welcome(5 mins ) : Chairs
+1. Chair Welcome(5 mins) : Chairs
 2. LEO Satellite vs. Cellular Networks: Exploring the Potential for Synergistic Integration (15 mins) : Bin Hu USC &  Feng Qian
 3. Handover Behaviors of LEO Satellite Networks and Impacts on the Transport-layer Protocols of the Internet (15 mins) : Jianping Pan
 4. Satellite Transmission Requirements Challenges (15 mins) : Tianji Jiang
