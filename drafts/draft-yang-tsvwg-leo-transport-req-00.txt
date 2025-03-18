@@ -1,0 +1,429 @@
+TSVWG                                                          F. Yang
+Internet Draft                                            China Mobile
+Intended status: Informational                                 T. Tsou
+Expires: September 16, 2025                                     Tiktok
+                                                        March 16, 2025
+
+
+
+           Transport Layer Protocol Requirement for LEO satellite
+                 draft-yang-tsvwg-leo-transport-req-00.txt
+
+
+Status of this Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF). Note that other groups may also distribute
+   working documents as Internet-Drafts. The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six
+   months and may be updated, replaced, or obsoleted by other documents
+   at any time. It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on September 16, 2025.
+
+Copyright Notice
+
+   Copyright (c) 2025 IETF Trust and the persons identified as the
+   document authors. All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document. Please review these documents
+   carefully, as they describe your rights and restrictions with
+   respect to this document. Code Components extracted from this
+   document must include Revised BSD License text as described in
+   Section 4.e of the Trust Legal Provisions and are provided without
+   warranty as described in the Revised BSD License.
+
+Abstract
+
+   In recent years, high-bandwidth LEO (Low Earth Orbit) satellite
+   networks, such as Starlink and OneWeb, have seen tremendous
+
+
+
+Yang                 Expires September 16, 2025               [Page 1]
+
+Internet-Draft  Transport Layer Protocol Req for LEO        March 2025
+
+
+   development and are gradually becoming an important part of the
+   global Internet. However, due to the unique characteristics of
+   satellite networks, using TCP for data transmission faces challenges
+   in multiple aspects, such as high latency caused by long-distance
+   propagation and high error rates due to signal attenuation. This
+   proposal analyzes the typical characteristics of LEO satellite
+   transmission and their impact on transport layer protocols, and
+   finally summarizes the basic requirements that need to be considered
+   for designing transport layer protocols tailored to LEO satellites.
+
+Table of Contents
+
+
+   1. Introduction .................................................. 2
+   2. Conventions used in this document ............................. 3
+   3. Problem Statement ............................................. 3
+   4. Requirement for transport layer protocol ...................... 5
+   5. Security Considerations ....................................... 7
+   6. References .................................................... 7
+      6.1. Normative References ..................................... 7
+      6.2. Informative References ................................... 7
+   7. Acknowledgments ............................................... 8
+
+1. Introduction
+
+   In recent years, high-bandwidth LEO (Low Earth Orbit) satellite
+   networks, such as Starlink and OneWeb, have achieved significant
+   development and are gradually becoming an important part of the
+   global Internet. However, the LEO satellite networks have unique
+   characteristics, which impacts TCP for data transmission.
+
+   o Frequent Handovers and Connection Switching: LEO satellites orbit
+      the Earth at high speeds (approximately 7.8 km/s), leading to
+      frequent handovers between ground terminals and satellites, as
+      well as between satellites themselves (every few to tens of
+      minutes). This can cause routing fluctuations, packet loss or
+      reordering, and failure of congestion control mechanisms.
+
+   o Signal Quality and Random Packet Loss: Signal quality is affected
+      by the distance between satellites and the ground, inter-
+      satellite links, Doppler shifts, and weather conditions. These
+      factors increase the error rate, leading to random packet loss
+      and triggering congestion window reduction, which in turn reduces
+      throughput.
+
+
+
+
+
+Yang                 Expires September 16, 2025               [Page 2]
+
+Internet-Draft  Transport Layer Protocol Req for LEO        March 2025
+
+
+   o Solar interference and Packet Loss: Periodic sun interference can
+      interrupt signals between satellites, causing packet loss and
+      triggering TCP timeout retransmissions. This further leads to
+      congestion window reduction and impacts throughput.
+
+   Currently, there are many standardization efforts targeting
+   satellite networks, mostly focusing on routing. For example, TVR
+   addresses dynamic routing, and TIPTOP focuses on QUIC deployment for
+   deep-space satellites. However, there is still a lack of
+   standardization work targeting the transport layer for LEO satellite
+   networks.
+
+2. Conventions used in this document
+
+   LEO: Low Earth Orbit
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC 2119 [RFC2119].
+
+3. Problem Statement
+
+   The unique characteristics of LEO networks-highly dynamic
+   topologies, long and variable propagation delays, time-varying
+   channel errors pose fundamental challenges to conventional transport
+   layer protocols like TCP. These protocols, designed for terrestrial
+   networks, fail to adapt to the space environment, leading to
+   degraded throughput, increased latency, and unreliable connectivity.
+
+   Study in [2] by Netflix analyzed on-demand video streaming over LEO
+   with one million LEO households across 85 countries for over two
+   years. Starlink users experience overall perceptual video quality
+   similar to non-Starlink networks, they are more likely to experience
+   bitrate switches and network rebuffers due to Starlink's network
+   conditions. About half of sessions with a bitrate switch experience
+   a resolution of less than 1080p. Video rebuffers are significantly
+   more likely to occur over Starlink than a Top 10 ISP, and 40% more
+   likely to occur relative to any non-Starlink network. It also finds
+   that over 95% of Starlink's throughput is lower than alternative
+   networks, which is nearly always 50% of what a top 10 ISP offers and
+   falls below 20 Mb/s. This eventually leads to bitrate switching and
+   rebuffer, which contributes negatively to overall quality of
+   experience over Starlink.
+
+   Study in [3] investigated the performance of TCP and UDP in the
+   Starlink network. TCP vs. UDP downlink test results consistently
+   reveal that UDP outperforms TCP in satellite networks, with the mean
+
+
+Yang                 Expires September 16, 2025               [Page 3]
+
+Internet-Draft  Transport Layer Protocol Req for LEO        March 2025
+
+
+   throughput being 128 Mbps and 29 Mbps, respectively. And the root
+   cause is there is a much higher occurrence of packet loss in both
+   the uplink and downlink directions in Starlink network. Based on
+   this finding, the author verified that TCP parallelism can optimize
+   bandwidth utilization by distributing data across multiple
+   connections, thereby mitigating the impact of TCP congestion control.
+
+   Study in [4] reveals that the endless and bursty packet losses over
+   unstable LEO satellite links impose significant challenges on
+   guaranteeing the quality of experience (QoE) of Web applications.
+   They found that in the Starlink network environment, both page load
+   time and speed index are much higher than those in the wired network.
+   Specifically, the 60th/80th/90th percentile page load time in
+   Starlink are about 245.0%/202.4%/136.3% higher than those in Optimum.
+   Similarly, the 60th/80th/90th percentile speed index in Starlink is
+   about 185.3%/241.6%/219.3% higher.
+
+   Various optimizations at the transport protocol level have been
+   proposed, such as end-to-end optimizations like SCPS-TP and MP-TCP,
+   redundancy coding like FEC, cross-layer optimizations like ECN, and
+   congestion control algorithm optimizations like TCP Westwood and TCP
+   Eifel, as well as AI-enhanced congestion control. This gives us a
+   more indication on what problem we should focused on.
+
+   o Bursty Packet Losses: bursty packet losses are a common
+      phenomenon in LEO satellite networks due to various factors such
+      as signal blockage from obstacles, rapid movement of satellites,
+      and interference from other signals. These bursty losses can
+      severely disrupt data transmission, leading to retransmission
+      delays and increased latency. Traditional error correction and
+      recovery mechanisms may not be effective in handling such bursty
+      losses, requiring the development of more robust and adaptive
+      techniques.
+
+   o Variable Round Trip Times: the dynamic nature of LEO satellite
+      networks results in highly variable Round Trip Times (RTTs). As
+      satellites move rapidly across the sky, the distance between the
+      sender and receiver changes constantly, causing fluctuations in
+      signal propagation delay. Additionally, network congestion and
+      routing changes can further exacerbate RTT variations. These
+      unpredictable RTTs can lead to inefficient resource utilization
+      and performance degradation in transmission protocols that rely
+      on accurate timing and synchronization.
+
+
+
+
+
+
+Yang                 Expires September 16, 2025               [Page 4]
+
+Internet-Draft  Transport Layer Protocol Req for LEO        March 2025
+
+
+   o Large and Variable Delay-Bandwidth Products: the combination of
+      high latency and variable bandwidth in LEO satellite networks
+      creates large and variable delay-bandwidth products. This makes
+      it challenging to maintain efficient data flow and congestion
+      control. Transmission protocols need to adapt to these varying
+      conditions to optimize throughput and avoid network congestion
+      while ensuring fair resource allocation among multiple users and
+      applications.
+
+   o High Bit Error Rates: the wireless communication environment of
+      LEO satellites is prone to high bit error rates (BER) due to
+      factors like signal attenuation, interference, and noise. These
+      errors can corrupt data packets, leading to retransmissions and
+      reduced overall network efficiency. Effective error detection and
+      correction mechanisms are essential to mitigate the impact of
+      high BER in LEO satellite transmission protocols.
+
+   o TCP Fairness: there will be competing connections with different
+      RTTs. The connections with high RTTs cannot allocate enough
+      bandwidth. Traditional TCP protocols may not perform well in such
+      environments due to their inherent assumptions about network
+      conditions. Developing fair and efficient resource allocation
+      mechanisms that consider the unique characteristics of LEO
+      satellite networks is necessary to prevent certain users or
+      applications from dominating network resources.
+
+   o Security: security is a concern in LEO satellite networks, as
+      they are vulnerable to various attacks such as jamming,
+      eavesdropping. Transmission protocols must incorporate robust
+      security measures to protect data integrity, confidentiality, and
+      availability. This includes encryption, authentication, and
+      intrusion detection mechanisms tailored to the specific
+      challenges of LEO satellite environments.
+
+4. Requirement for transport layer protocol
+
+   Given the unique characteristics of LEO satellite networks, the
+   requirements for transport layer protocols should focus on improving
+   the following aspects:
+
+
+
+
+
+
+
+
+
+Yang                 Expires September 16, 2025               [Page 5]
+
+Internet-Draft  Transport Layer Protocol Req for LEO        March 2025
+
+
+   o Fast Connection Establishment. In satellite networks, fast
+      connection establishment is crucial for improving communication
+      efficiency. For short-lived communication needs, such as bursty
+      data transmission from mobile users, a slow connection setup
+      process can waste significant time. TCP needs to optimize its
+      connection establishment process by adopting fast handshake
+      algorithms and other techniques to reduce the time required for
+      connection setup and enhance the responsiveness of satellite
+      networks.
+
+   o High-Bandwidth Support. High-performance transport protocols aim
+      to support the rapid transmission of large volumes of data, such
+      as high-definition video streaming and big data file transfers.
+      When sufficient bandwidth capacity is available in the satellite
+      link, the protocol should provide high-bandwidth transmission
+      capabilities to meet the demands of these applications.
+
+   o Adaptation to Latency Variations. The latency in satellite
+      networks may fluctuate due to factors such as satellite handovers
+      and signal interference, causing RTT (Round-Trip Time) jitter.
+      Transport protocols need to quickly adapt to this latency jitter
+      to avoid performance degradation resulting from congestion window
+      changes triggered by the jitter.
+
+   o Error Resistance. Data packet loss in satellite channels can be
+      caused by obstructions, atmospheric interference, and spatial
+      distance. More efficient packet loss detection and recovery
+      mechanisms are needed. For example, redundancy-based encoding
+      methods can be introduced, where the sender encodes data with
+      redundancy, and the receiver can use this redundant information
+      to recover lost packets, reducing the need for retransmissions
+      and enhancing the reliability of data transmission.
+
+   o Resilience to Network Interruptions. Short-term interruptions in
+      satellite links can easily occur due to sun outages or satellite
+      coverage limitations. During such interruptions, the transport
+      protocol should reduce the sending rate to minimize unnecessary
+      packet transmission. Once the interruption is resolved, the
+      protocol should quickly restore the bandwidth to ensure efficient
+      data transfer.
+
+   o Reduced Retransmission Rate. Retransmissions increase
+      transmission delay and consume bandwidth, which are particularly
+      valuable resources in satellite networks. Transport protocols
+      need to minimize unnecessary retransmissions through accurate
+      packet loss detection and effective error recovery mechanisms,
+      thereby optimizing the overall efficiency of data transmission.
+
+
+Yang                 Expires September 16, 2025               [Page 6]
+
+Internet-Draft  Transport Layer Protocol Req for LEO        March 2025
+
+
+   o Improved Out-of-Order Handling. The complex transmission
+      environment in satellite networks can cause packets to arrive out
+      of order at the receiver due to different routing paths and
+      varying transmission delays. Transport protocols must be capable
+      of accurately reordering out-of-order packets to ensure the
+      correct delivery of data.
+
+5. Security Considerations
+
+   None.
+
+6. References
+
+6.1. Normative References
+
+   [1]  Bradner, S., "Key words for use in RFCs to Indicate
+         Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC2119] Bradner, S., "Key words for use in RFCs to Indicate
+             Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+6.2. Informative References
+
+   [2]  Liz Izhikevich, Reese Enghardt, Te-Yuan Huang, and Renata
+         Teixeira. 2024. A Global Perspective on the Past, Present, and
+         Future of Video Streaming over Starlink. Proc. ACM Meas. Anal.
+         Comput. Syst. 8, 3, Article 30 (December 2024), 22 pages.
+         https://doi.org/10.1145/3700412
+
+   [3]  Bin Hu, Xumiao Zhang, Qixin Zhang, Nitin Varyani, Z. Morley
+         Mao, Feng Qian, and Zhi-Li Zhang. 2023. LEO Satellite vs.
+         Cellular Networks: Exploring the Potential for Synergistic
+         Integration. In Companion of the 19th International Conference
+         on emerging Networking EXperiments and Technologies (CoNEXT
+         2023). Association for Computing Machinery, New York, NY, USA,
+         45-51. https://doi.org/10.1145/3624354.3630588
+
+   [4]  Jihao Li, Hewu Li, Zeqi Lai, Qian Wu, Yijie Liu, Qi Zhang,
+         Yuanjie Li, and Jun Liu. 2024. SatGuard: Concealing Endless
+         and Bursty Packet Losses in LEO Satellite Networks for Delay-
+         Sensitive Web Applications. In Proceedings of the ACM Web
+         Conference 2024 (WWW '24). Association for Computing Machinery,
+         New York, NY, USA, 3053-3063.
+         https://doi.org/10.1145/3589334.3645639
+
+
+
+
+
+Yang                 Expires September 16, 2025               [Page 7]
+
+Internet-Draft  Transport Layer Protocol Req for LEO        March 2025
+
+
+7. Acknowledgments
+
+   This document was prepared using 2-Word-v2.0.template.dot.
+
+
+
+Authors' Addresses
+
+   Feng Yang
+   China Mobile
+   Email: yangfeng@chinamobile.com
+
+
+   Tina Tsou
+   Tiktok
+   Email: tina.tsou@tiktok.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Yang                 Expires September 16, 2025               [Page 8]
+
